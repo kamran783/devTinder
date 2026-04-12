@@ -2,26 +2,11 @@ const express = require("express");
 
 const app = express();
 
-// Use Use .*a.* — which means anything, then a, then anything:
-
-
-//------------------------------------------------------------------------------------------------------
-//when to use which regex in path 
-
-// Is your URL fixed or simple?
-//         |
-//        YES → use " " string
-//         |
-//         NO → Does it need flexible/complex matching?
-//                     |
-//                    YES → use / / regex
-
-
-//-------------------------------------------------------------------------------------------------------
-
-
-app.get(/\/.*a.*/, (req, res) => {
+app.get("/user/:userId/:name/:age", (req, res) => {
+  console.log(req.params);
   res.send("matched!");
 });
 
-app.listen(7777);
+app.listen(7777, ()=>{
+    console.log("server is listening on port 7777")
+});
