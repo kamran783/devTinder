@@ -2,9 +2,9 @@ const express = require("express");
 
 const app = express();
 
-// Use .* instead — . means any character, * means zero or more:
+// Use Use .*a.* — which means anything, then a, then anything:
 
-app.get(/\/ab.*c/, (req, res) => {
+app.get(/\/.*a.*/, (req, res) => {
   res.send("matched!");
 });
 
