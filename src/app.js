@@ -2,7 +2,9 @@ const express = require("express");
 
 const app = express();
 
+app.use("/admin",(res)=>{
 
+})
 
 //poor way of autthorization of users
 app.use("/admin/getalldata",(req,res)=>{
