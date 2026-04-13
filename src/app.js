@@ -1,33 +1,21 @@
 const express = require("express");
+const { adminAuth } = require("./middleware/auth.js");
 
 const app = express();
 
-app.use("/admin",(res)=>{
+app.use("/admin", adminAuth);
 
+app.get("/admin/getalldata", (req, res) => {
+  res.send("get user data verified");
+});
+
+app.get("/admin/setalldata", (req, res) => {
+  res.send("set user data has successfully done!!!");
+});
+
+app.get("/allauths",adminAuth, (req,res)=>{
+  res.send("works perfectly fine!!")
 })
-
-//poor way of autthorization of users
-app.use("/admin/getalldata",(req,res)=>{
-  let token = "xyx";
-  let isAuthorized = token === "xyx";
-  if(isAuthorized){
-    res.send("first one")
-  } else {
-    res.status(401).send("not authorized")
-  }
-})
-app.use("/admin/setalldata",(req,res)=>{
-  let token = "xyx";
-  let isAuthorized = token === "xyx";
-  if(isAuthorized){
-    res.send("second one")
-  } else {
-    res.status(401).send("not authorized")
-  }
-})
-
-
-
 
 app.listen(7777, () => {
   console.log("server is listening on port 7777");
