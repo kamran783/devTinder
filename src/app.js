@@ -18,6 +18,7 @@ app.post("/Signup", async (req, res) => {
     res.status(400).send("Error saving the user data" + err.message);
   }
 });
+
 connectDB()
   .then(() => {
     console.log("Successfully connected to database ✅");
