@@ -8,12 +8,18 @@ const app = express();
 app.use(express.json());
 
 app.post("/Signup", async (req, res) => {
-  const user = new User(req.body);
+
+  const user = new User(req.body)
   try {
-    await user.save();
-    res.send("user added sucessfully");
+    //let users = await User.find({age : req.body.age})
+    //let users = await User.findOne({age : req.body.age})
+    let users = await User.exists({age : req.body.age})
+    if(users.length === 0){
+      res.status(400).send("No users present")
+    }
+    res.send(users);
   } catch (err) {
-    res.status(400).send("Error saving the user data" + err.message);
+    res.status(404).send("Error saving the user data" + err.message);
   }
 });
 
