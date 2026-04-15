@@ -8,12 +8,10 @@ const app = express();
 app.use(express.json());
 
 app.post("/Signup", async (req, res) => {
+  const user = new User(req.body);
   try {
-    let users = await User.find({email : req.body.email})
-    if(users.length === 0){
-      res.status(400).send("No users present")
-    }
-    res.send(users);
+    await user.save();
+    res.send("user added sucessfully");
   } catch (err) {
     res.status(400).send("Error saving the user data" + err.message);
   }
