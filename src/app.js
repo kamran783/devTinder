@@ -8,24 +8,20 @@ const app = express();
 app.use(express.json());
 
 app.post("/Signup", async (req, res) => {
+  let newUser = req.body;
+  const user = new User(newUser);
   try {
-    //let users = await User.find({age : req.body.age})
-    //let users = await User.findOne({age : req.body.age})
-    //let users = await User.findById({_id : req.body._id})
-    let users = await User.findById({ _id: req.body._id });
-    if (users.length === 0) {
-      res.status(400).send("No users present");
-    }
-    res.send(users);
+    await user.save();
+    res.status(201).send("User Logged In Sucessfully");
   } catch (err) {
-    res.status(404).send("Error saving the user data" + err.message);
+    res.status(400).send("Something went wrong!!");
   }
 });
 
 app.post("/delete", async (req, res) => {
   const userId = req.body.userId;
   try {
-    const deletedUser = await User.findByIdAndDelete({_id : req.body._id});
+    const deletedUser = await User.findByIdAndDelete({ _id: req.body._id });
 
     res.send("User deleted Sucessfully");
   } catch (err) {
@@ -33,16 +29,16 @@ app.post("/delete", async (req, res) => {
   }
 });
 
-app.post("/update", async(req,res)=>{
+app.post("/update", async (req, res) => {
   let userId = req.body.userId;
   const data = req.body;
-  try{
-    let update = await User.findByIdAndUpdate({_id : userId}, data)
-    res.send("user updated Sucessfully")
-  }catch(err){
-    res.status(400).send("user not found to update")
+  try {
+    let update = await User.findByIdAndUpdate({ _id: userId }, data);
+    res.send("user updated Sucessfully");
+  } catch (err) {
+    res.status(400).send("user not found to update");
   }
-})
+});
 
 connectDB()
   .then(() => {
