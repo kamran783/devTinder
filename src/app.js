@@ -7,46 +7,51 @@ const app = express();
 
 app.use(express.json());
 
+// connect DB FIRST
+connectDB().then(() => {
+  console.log("DB connected");
+
+  app.listen(1234, () => {
+    console.log("Server running on 1234");
+  });
+});
+
+//POST creates the new data
 app.post("/Signup", async (req, res) => {
-  let newUser = req.body;
-  const user = new User(newUser);
+  let user = new User(req.body);
   try {
     await user.save();
-    res.status(201).send("User Logged In Sucessfully");
+    console.log(user)
+    res.send("Added to database");
   } catch (err) {
-    res.status(400).send("Something went wrong!!");
+    res.status(400).send("Error addind a new member" + err.message);
   }
 });
 
-app.post("/delete", async (req, res) => {
-  const userId = req.body.userId;
+//GET retrive the data from database
+app.get("/users", async (req, res) => {
+  //let userId = req.body._id;
   try {
-    const deletedUser = await User.findByIdAndDelete({ _id: req.body._id });
-
-    res.send("User deleted Sucessfully");
+    let users = await User.find({});
+    console.log("found user " + users);
+    res.send(users);
   } catch (err) {
-    res.status(400).send("Something went wrong");
+    res.status(500).send("User not found");
   }
 });
 
-app.post("/update", async (req, res) => {
+//PATCH partially updates the database
+app.patch("/update", async (req, res) => {
   let userId = req.body.userId;
   const data = req.body;
   try {
-    let update = await User.findByIdAndUpdate({ _id: userId }, data);
-    res.send("user updated Sucessfully");
+    let update = await User.findByIdAndUpdate({ _id: userId }, data, {
+      returnDocument : "after",
+      runValidators: true,
+    });
+    console.log(update)
+    res.send(update);
   } catch (err) {
-    res.status(400).send("user not found to update");
+    res.status(400).send("user not found");
   }
 });
-
-connectDB()
-  .then(() => {
-    console.log("Successfully connected to database ✅");
-    app.listen(7777, () => {
-      console.log("Server is listening on port 7777");
-    });
-  })
-  .catch((err) => {
-    console.log(err);
-  });
