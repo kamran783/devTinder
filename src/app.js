@@ -4,7 +4,8 @@ const User = require("./models/user");
 require("dns").setServers(["8.8.8.8", "1.1.1.1"]);
 const { validatedata } = require("./utils/validatedata");
 const bcrypt = require("bcrypt");
-const cookieparser = require("cookie-parser")
+const cookieparser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 app.use(express.json());
@@ -50,8 +51,7 @@ app.post("/login", async (req, res) => {
 
   try {
     let user = await User.findOne({ email }); 
-    console.log(user);
-
+    
     if (!user) {
       return res.status(400).send("Invalid credentials");
     }
@@ -59,7 +59,10 @@ app.post("/login", async (req, res) => {
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (isPasswordCorrect) {
-      res.cookie("token", "dhfliszrhgu45hrjg");
+
+      let token = jwt.sign({_id : user._id}, "hawlahaikyarey" )
+      
+      res.cookie("token", token);
       return res.send("Login Successful");
     } else {
       return res.status(400).send("Invalid Credentials");
@@ -75,9 +78,14 @@ app.get("/profile", async(req,res)=>{
 
   const {token} = cookies;
 
+  if (!token) {
+    return res.status(401).json({ message: "No token found in cookies" });
+  }
   //validatiny my token
-
-  res.send("Reading cookies")
+  let decodedMsg = jwt.verify(token, "hawlahaikyarey")
+  let user = await  User.findById(decodedMsg._id)
+  console.log(user)
+  res.send(user)
 })
 
 app.get("/users", async (req, res) => {
