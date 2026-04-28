@@ -2,64 +2,95 @@ const express = require("express");
 const connectDB = require("./config/database");
 const User = require("./models/user");
 require("dns").setServers(["8.8.8.8", "1.1.1.1"]);
-const {validatedata} = require("./utils/validatedata")
+const { validatedata } = require("./utils/validatedata");
 const bcrypt = require("bcrypt");
+const cookieparser = require("cookie-parser")
 
 const app = express();
-
 app.use(express.json());
+app.use(cookieparser())
 
-// connect DB FIRST
 connectDB().then(() => {
   console.log("DB connected");
-
   app.listen(1234, () => {
     console.log("Server running on 1234");
   });
 });
 
-//POST creates the new data
+
 app.post("/Signup", async (req, res) => {
-  //validate signUp Api
-
-  validatedata(req);
-
-  const{password, firstName, lastName, age, gender,email, skills} = req.body
-
-  //bcrypt user data
-  let hashPassword = await bcrypt.hash(password, 10)
-  
-  let user = new User({
-    firstName, 
-    lastName,
-    email,
-    age,
-    gender,
-    skills,
-    password : hashPassword
-  });
   try {
+    validatedata(req);
+
+    const { password, firstName, lastName, age, gender, email, skills } = req.body;
+
+    let hashPassword = await bcrypt.hash(password, 10);
+
+    let user = new User({
+      firstName,
+      lastName,
+      email,
+      age,
+      gender,
+      skills,
+      password: hashPassword,
+    });
+
     await user.save();
     console.log(user);
     res.send("Added to database");
+
   } catch (err) {
-    res.status(400).send("Error addind a new member" + err.message);
+    res.status(400).send("Error adding a new member: " + err.message);
   }
 });
 
-//GET retrive the data from database
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body; 
+
+  try {
+    let user = await User.findOne({ email }); 
+    console.log(user);
+
+    if (!user) {
+      return res.status(400).send("Invalid credentials");
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+    if (isPasswordCorrect) {
+      res.cookie("token", "dhfliszrhgu45hrjg");
+      return res.send("Login Successful");
+    } else {
+      return res.status(400).send("Invalid Credentials");
+    }
+
+  } catch (err) {
+    return res.status(400).send("Error: " + err.message);
+  }
+});
+
+app.get("/profile", async(req,res)=>{
+  let cookies = req.cookies;
+
+  const {token} = cookies;
+
+  //validatiny my token
+
+  res.send("Reading cookies")
+})
+
 app.get("/users", async (req, res) => {
-  //let userId = req.body._id;
   try {
     let users = await User.find({});
-    console.log("found user " + users);
+    console.log("found users: " + users);
     res.send(users);
   } catch (err) {
     res.status(500).send("User not found");
   }
 });
 
-//PATCH partially updates the database
+
 app.patch("/update/:userId", async (req, res) => {
   const userId = req.params.userId;
   const data = req.body;
@@ -67,13 +98,15 @@ app.patch("/update/:userId", async (req, res) => {
   try {
     const ALLOWED_UPDATES = ["age", "skills", "gender"];
     const isUpdateAllowed = Object.keys(data).every((k) =>
-      ALLOWED_UPDATES.includes(k),
+      ALLOWED_UPDATES.includes(k)
     );
+
     if (!isUpdateAllowed) {
       throw new Error("Update not allowed");
     }
+
     if (data?.skills?.length > 10) {
-      throw new error("skills cannot be more than 10");
+      throw new Error("Skills cannot be more than 10"); // 👈 fixed: "error" → "Error"
     }
 
     const user = await User.findByIdAndUpdate(userId, data, {
@@ -85,6 +118,7 @@ app.patch("/update/:userId", async (req, res) => {
 
     console.log(user);
     res.send(user);
+
   } catch (err) {
     res.status(400).send(err.message);
   }
