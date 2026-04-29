@@ -6,11 +6,11 @@ const { validatedata } = require("./utils/validatedata");
 const bcrypt = require("bcrypt");
 const cookieparser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
-const {userAuth} = require("./middleware/auth")
+const { userAuth } = require("./middleware/auth");
 
 const app = express();
 app.use(express.json());
-app.use(cookieparser())
+app.use(cookieparser());
 
 connectDB().then(() => {
   console.log("DB connected");
@@ -19,12 +19,12 @@ connectDB().then(() => {
   });
 });
 
-
 app.post("/Signup", async (req, res) => {
   try {
     validatedata(req);
 
-    const { password, firstName, lastName, age, gender, email, skills } = req.body;
+    const { password, firstName, lastName, age, gender, email, skills } =
+      req.body;
 
     let hashPassword = await bcrypt.hash(password, 10);
 
@@ -40,52 +40,49 @@ app.post("/Signup", async (req, res) => {
 
     await user.save();
     res.send("Added to database");
-
   } catch (err) {
     res.status(400).send("Error adding a new member: " + err.message);
   }
 });
 
 app.post("/login", async (req, res) => {
-  const { email, password } = req.body; 
+  const { email, password } = req.body;
 
   try {
-    let user = await User.findOne({ email }); 
-    
+    let user = await User.findOne({ email });
+
     if (!user) {
-      return res.status(400).send("Invalid credentials");
+      res.status(400).send("Invalid credentials");
     }
 
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    const isPasswordCorrect = await validatePassword(password);
 
     if (isPasswordCorrect) {
+      const token = await user.getJWT();
 
-      let token = jwt.sign({_id : user._id}, "hawlahaikyarey" )
-      
-      res.cookie("token", token);
-      return res.send("Login Successful");
+      res.cookie("token", token, { expires: new Date(Date.now() + 900000) });
+      res.send("Login Successful");
     } else {
-      return res.status(400).send("Invalid Credentials");
+      res.status(400).send("Invalid Credentials");
     }
-
   } catch (err) {
-    return res.status(400).send("Error: " + err.message);
+    res.status(400).send("Error: " + err.message);
   }
 });
 
-app.get("/profile",userAuth, async(req,res)=>{
+app.get("/profile", userAuth, async (req, res) => {
   try {
     const user = req.user;
-    res.send(user)
-  } catch (err){
-    res.status(400).send("something went wrong")
+    res.send(user);
+  } catch (err) {
+    res.status(400).send("something went wrong");
   }
-})
+});
 
-app.post("/sendConnectionrequest", userAuth, (req,res)=> {
+app.post("/sendConnectionRequest", userAuth, (req, res) => {
   let user = req.user;
-  res.send(user.firstName + "!! has a send a connection request")
-})
+  res.send(user.firstName + "!! has a send a connection request");
+});
 
 app.get("/users", async (req, res) => {
   try {
@@ -97,7 +94,6 @@ app.get("/users", async (req, res) => {
   }
 });
 
-
 app.patch("/update/:userId", async (req, res) => {
   const userId = req.params.userId;
   const data = req.body;
@@ -105,7 +101,7 @@ app.patch("/update/:userId", async (req, res) => {
   try {
     const ALLOWED_UPDATES = ["age", "skills", "gender"];
     const isUpdateAllowed = Object.keys(data).every((k) =>
-      ALLOWED_UPDATES.includes(k)
+      ALLOWED_UPDATES.includes(k),
     );
 
     if (!isUpdateAllowed) {
@@ -125,7 +121,6 @@ app.patch("/update/:userId", async (req, res) => {
 
     console.log(user);
     res.send(user);
-
   } catch (err) {
     res.status(400).send(err.message);
   }
