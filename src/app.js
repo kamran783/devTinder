@@ -6,6 +6,7 @@ const { validatedata } = require("./utils/validatedata");
 const bcrypt = require("bcrypt");
 const cookieparser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
+const {userAuth} = require("./middleware/auth")
 
 const app = express();
 app.use(express.json());
@@ -38,7 +39,6 @@ app.post("/Signup", async (req, res) => {
     });
 
     await user.save();
-    console.log(user);
     res.send("Added to database");
 
   } catch (err) {
@@ -73,19 +73,18 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/profile", async(req,res)=>{
-  let cookies = req.cookies;
-
-  const {token} = cookies;
-
-  if (!token) {
-    return res.status(401).json({ message: "No token found in cookies" });
+app.get("/profile",userAuth, async(req,res)=>{
+  try {
+    const user = req.user;
+    res.send(user)
+  } catch (err){
+    res.status(400).send("something went wrong")
   }
-  //validatiny my token
-  let decodedMsg = jwt.verify(token, "hawlahaikyarey")
-  let user = await  User.findById(decodedMsg._id)
-  console.log(user)
-  res.send(user)
+})
+
+app.post("/sendConnectionrequest", userAuth, (req,res)=> {
+  let user = req.user;
+  res.send(user.firstName + "!! has a send a connection request")
 })
 
 app.get("/users", async (req, res) => {
