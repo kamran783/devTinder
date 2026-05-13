@@ -44,8 +44,12 @@ const userSchema = new Schema(
     },
     skills: {
       type: [String],
+       validator: function(arr) {
+      return arr.length <= 5;  // ✅ max 5 skills allowed
     },
-  },
+    message: "Skills cannot be more than 5"
+  }
+    },
   {
     timestamps: true,
   },

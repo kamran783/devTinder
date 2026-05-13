@@ -23,8 +23,9 @@ connectDB().then(() => {
 
 const authRouter = require("./Router/authRouter");
 const requestRouter = require("./Router/requestRouter");
+const profileRouter = require("./Router/profileRouter");
 
 
 app.use("/", authRouter);
-
-
+app.use("/", requestRouter);
+app.use("/", profileRouter)
