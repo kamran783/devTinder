@@ -1,6 +1,7 @@
 const express = require("express");
 const { userAuth } = require("../middleware/auth");
 const connectionRequest = require("../models/sendConnectionRequest");
+const User = require("../models/user");
 
 const RequestRouter = express.Router();
 
@@ -12,6 +13,28 @@ RequestRouter.post(
       let sender = req.user._id;
       let receiver = req.params.receiver;
       let status = req.params.intrested;
+
+      let allowedStatus = ["ignore", "intrested"];
+      if (!allowedStatus.includes(status)) {
+        return res.status(400).send("Invalid user request!!");
+      }
+
+      let checkExistingRequest = await connectionRequest.findOne({
+        $or: [
+          { sender, receiver },
+          { sender: receiver, receiver: sender },
+        ],
+      });
+      if (checkExistingRequest) {
+        return res.status(404).json({
+          message: "Connection request already sent",
+        });
+      }
+
+      let toReceiver = await User.findById(receiver);
+      if (!toReceiver) {
+        return res.status(400).json({ message: "User not found" });
+      }
 
       let requestScheme = new connectionRequest({
         sender,

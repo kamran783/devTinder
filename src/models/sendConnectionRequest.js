@@ -12,12 +12,22 @@ const connectionRequest = new Schema({
     },
     status : {
         type : String,
-        enum : ["intrested", "ignored"],
+        enum : ["intrested", "ignore"],
         required : true,
     }
 },
 {
     timestamps : true,
 })
+
+connectionRequest.pre("save", function(){
+    let currentuser = this;
+    if(currentuser.sender.equals(currentuser.receiver)){
+         throw new Error("You cant request to yourself")
+    }
+
+})
+
+
 
 module.exports = mongoose.model("userConnection", connectionRequest);
