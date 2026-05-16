@@ -4,6 +4,7 @@ const {Schema} = mongoose;
 const connectionRequest = new Schema({
     sender : {
         type : mongoose.Schema.Types.ObjectId,
+        ref : "User",
         required : true
     },
     receiver : {
@@ -12,7 +13,7 @@ const connectionRequest = new Schema({
     },
     status : {
         type : String,
-        enum : ["intrested", "ignore"],
+        enum : ["intrested", "ignore", "accepted", "rejected"],
         required : true,
     }
 },
