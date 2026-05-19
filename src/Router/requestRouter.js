@@ -6,13 +6,13 @@ const User = require("../models/user");
 const RequestRouter = express.Router();
 
 RequestRouter.post(
-  "/request/send/:intrested/:receiver",
+  "/request/send/:status/:receiver",
   userAuth,
   async (req, res) => {
     try {
       let sender = req.user._id;
       let receiver = req.params.receiver;
-      let status = req.params.intrested;
+      let status = req.params.status;
 
       let allowedStatus = ["ignore", "intrested"];
       if (!allowedStatus.includes(status)) {
@@ -63,13 +63,18 @@ RequestRouter.post(
       if (!allowedStatus.includes(status)) {
         return res.status(400).json({ message: "status not valid" });
       }
+      // Add temporarily before findOne()
+      const debugDoc = await connectionRequest.findById(requestId);
+      console.log("Found doc:", debugDoc);
       let requestUser = await connectionRequest.findOne({
         _id: requestId,
         receiver: loggedInUser._id,
         status: "intrested",
       });
       if (!requestUser) {
-        res.status(400).json({ message: "Connection Request not found!!!" });
+        return res
+          .status(400)
+          .json({ message: "Connection Request not found!!!" });
       }
       requestUser.status = status;
       await requestUser.save();
@@ -79,4 +84,5 @@ RequestRouter.post(
     }
   },
 );
+
 module.exports = RequestRouter;
