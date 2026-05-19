@@ -19,6 +19,10 @@ connectDB().then(() => {
   });
 });
 
+app.get("/users", async(req,res)=>{
+  let users = await User.find({});
+  res.send(users)
+})
 
 
 const authRouter = require("./Router/authRouter");

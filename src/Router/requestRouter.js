@@ -63,9 +63,9 @@ RequestRouter.post(
       if (!allowedStatus.includes(status)) {
         return res.status(400).json({ message: "status not valid" });
       }
-      // Add temporarily before findOne()
       const debugDoc = await connectionRequest.findById(requestId);
       console.log("Found doc:", debugDoc);
+
       let requestUser = await connectionRequest.findOne({
         _id: requestId,
         receiver: loggedInUser._id,
