@@ -53,9 +53,6 @@ userRouter.get("/users/connections", userAuth, async (req, res) => {
 userRouter.get("/user/feed", userAuth, async (req, res) => {
   try {
     let loggedInUser = req.user;
-    //scenarios
-    //1. i dont want to see people who i sent the request or received from people
-    //2. i dont want my own profile(card ) on my screen
     let myConnections = await connectionRequest
       .find({
         $or: [{ sender: loggedInUser._id }, { receiver: loggedInUser._id }],
