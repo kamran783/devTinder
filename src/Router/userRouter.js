@@ -1,6 +1,7 @@
 const express = require("express");
 const connectionRequest = require("../models/sendConnectionRequest");
 const { userAuth } = require("../middleware/auth");
+const User = require("../models/user")
 const userRouter = express.Router();
 
 userRouter.get("/user/request/received", userAuth, async (req, res) => {
@@ -46,6 +47,37 @@ userRouter.get("/users/connections", userAuth, async (req, res) => {
     res.json({ data });
   } catch (err) {
     res.status(400).send("ERROR : " + err.message);
+  }
+});
+
+userRouter.get("/user/feed", userAuth, async (req, res) => {
+  try {
+    let loggedInUser = req.user;
+    //scenarios
+    //1. i dont want to see people who i sent the request or received from people
+    //2. i dont want my own profile(card ) on my screen
+    let myConnections = await connectionRequest
+      .find({
+        $or: [{ sender: loggedInUser._id }, { receiver: loggedInUser._id }],
+      })
+      .populate("sender", "firstName lastName")
+      .populate("receiver", "firstName lastName");
+
+    let hideUsersFromFeed = new Set();
+    myConnections.forEach((conn) => {
+      hideUsersFromFeed.add(conn.sender._id.toString());
+      hideUsersFromFeed.add(conn.receiver._id.toString());
+    });
+
+    const users = await User.find({
+      $and: [
+        { _id: { $nin: Array.from(hideUsersFromFeed) } },
+        { _id: { $ne: loggedInUser._id } },
+      ],
+    });
+    res.send(users)
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 });
 module.exports = userRouter;
