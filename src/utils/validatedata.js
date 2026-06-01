@@ -12,7 +12,7 @@ const validatedata = (req) => {
 };
 
 const validateEditdata = (req) => {
-  const isAllowedUpdates = ["firstName", "lastName", "skills", "email"];
+  const isAllowedUpdates = ["firstName", "lastName", "skills", "email", "age"];
 
   let isAllowed = Object.keys(req.body).every((key) => isAllowedUpdates.includes(key));
 

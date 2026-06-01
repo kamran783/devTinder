@@ -47,7 +47,8 @@ const userSchema = new Schema(
        validator: function(arr) {
       return arr.length <= 5;  // ✅ max 5 skills allowed
     },
-    message: "Skills cannot be more than 5"
+    message: "Skills cannot be more than 5",
+    default : ["studying", "playing"]
   }
     },
   {

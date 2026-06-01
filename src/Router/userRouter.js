@@ -1,7 +1,7 @@
 const express = require("express");
 const connectionRequest = require("../models/sendConnectionRequest");
 const { userAuth } = require("../middleware/auth");
-const User = require("../models/user")
+const User = require("../models/user");
 const userRouter = express.Router();
 
 userRouter.get("/user/request/received", userAuth, async (req, res) => {
@@ -53,6 +53,12 @@ userRouter.get("/users/connections", userAuth, async (req, res) => {
 userRouter.get("/user/feed", userAuth, async (req, res) => {
   try {
     let loggedInUser = req.user;
+
+    let page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
+    limit = limit > 50 ? 50 : limit;
+    const skip = (page - 1) * limit;
+
     let myConnections = await connectionRequest
       .find({
         $or: [{ sender: loggedInUser._id }, { receiver: loggedInUser._id }],
@@ -71,8 +77,11 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
         { _id: { $nin: Array.from(hideUsersFromFeed) } },
         { _id: { $ne: loggedInUser._id } },
       ],
-    });
-    res.send(users)
+    })
+      .select("firstName lastName skills")
+      .skip(skip)
+      .limit(limit);
+    res.send(users);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
