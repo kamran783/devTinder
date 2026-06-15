@@ -39,7 +39,7 @@ authRouter.post("/login", async (req, res) => {
     let user = await User.findOne({ email });
 
     if (!user) {
-      res.status(400).send("Invalid credentials");
+      return res.status(400).send("Invalid credentials");
     }
 
     const isPasswordCorrect = await user.validatePassword(password);
@@ -47,10 +47,12 @@ authRouter.post("/login", async (req, res) => {
     if (isPasswordCorrect) {
       const token = await user.getJWT();
 
-      res.cookie("token", token, { expires: new Date(Date.now() +  24 * 60 * 60 * 1000) });
-      res.send("Login Successful");
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      });
+      res.send(user);
     } else {
-      res.status(400).send("Invalid Credentials");
+      return res.status(400).send("Invalid Credentials");
     }
   } catch (err) {
     res.status(400).send("Error: " + err.message);
@@ -64,7 +66,5 @@ authRouter.post("/logout", async (req, res) => {
     })
     .send("Logout Sucessfull!!!");
 });
-
-
 
 module.exports = authRouter;

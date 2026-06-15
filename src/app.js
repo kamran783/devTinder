@@ -7,8 +7,15 @@ const bcrypt = require("bcrypt");
 const cookieparser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 const { userAuth } = require("./middleware/auth");
+const cors = require("cors");
 
 const app = express();
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(cookieparser());
 
@@ -19,19 +26,17 @@ connectDB().then(() => {
   });
 });
 
-app.get("/users", async(req,res)=>{
+app.get("/users", async (req, res) => {
   let users = await User.find({});
-  res.send(users)
-})
-
+  res.send(users);
+});
 
 const authRouter = require("./Router/authRouter");
 const requestRouter = require("./Router/requestRouter");
 const profileRouter = require("./Router/profileRouter");
 const userRouter = require("./Router/userRouter");
 
-
 app.use("/", authRouter);
 app.use("/", requestRouter);
-app.use("/", profileRouter)
-app.use("/", userRouter)
+app.use("/", profileRouter);
+app.use("/", userRouter);
