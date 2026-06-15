@@ -1,6 +1,6 @@
 const validator = require("validator");
 const validatedata = (req) => {
-  const { email, password, firstName, lastName } = req.body;
+  const { email, password, firstName, lastName, age, gender } = req.body;
 
   if (!firstName || !lastName) {
     throw new Error("Enter valid Name");
@@ -12,7 +12,7 @@ const validatedata = (req) => {
 };
 
 const validateEditdata = (req) => {
-  const isAllowedUpdates = ["firstName", "lastName", "skills", "email", "age"];
+  const isAllowedUpdates = ["firstName", "lastName", "skills", "email", "age", "gender", "Image", "about"];
 
   let isAllowed = Object.keys(req.body).every((key) => isAllowedUpdates.includes(key));
 

@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const validator = require("validator");
@@ -44,13 +44,22 @@ const userSchema = new Schema(
     },
     skills: {
       type: [String],
-       validator: function(arr) {
-      return arr.length <= 5;  // ✅ max 5 skills allowed
+      validator: function (arr) {
+        return arr.length <= 5; // ✅ max 5 skills allowed
+      },
+      message: "Skills cannot be more than 5",
+      default: ["studying", "playing"],
     },
-    message: "Skills cannot be more than 5",
-    default : ["studying", "playing"]
-  }
+    Image: {
+      type: String,
+      default:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNI-hhvFAbUrXvuW6-XpbU_cJHojzpdMZwbg&s",
     },
+    about: {
+      type: String,
+      default: "This is the default bio",
+    },
+  },
   {
     timestamps: true,
   },
@@ -68,7 +77,10 @@ userSchema.methods.getJWT = async function () {
 userSchema.methods.validatePassword = async function (passwordInputByUser) {
   let user = this;
   const passwordHash = this.password;
-  let isPasswordCorrect = await bcrypt.compare(passwordInputByUser, passwordHash);
+  let isPasswordCorrect = await bcrypt.compare(
+    passwordInputByUser,
+    passwordHash,
+  );
   return isPasswordCorrect;
 };
 module.exports = mongoose.model("User", userSchema);

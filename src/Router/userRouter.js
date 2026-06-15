@@ -12,7 +12,7 @@ userRouter.get("/user/request/received", userAuth, async (req, res) => {
         receiver: loggedInUser._id,
         status: "intrested",
       })
-      .populate("sender", "firstName lastName gender");
+      .populate("sender", "firstName lastName gender Image gender about");
     // }).populate("sender", ["firstName", "lastName", "gender"]);
 
     res.json({ message: "Your follow requests", data: findConnectionds });
@@ -31,8 +31,8 @@ userRouter.get("/users/connections", userAuth, async (req, res) => {
           { receiver: loggedInUser, status: "accepted" },
         ],
       })
-      .populate("sender", "firstName lastName")
-      .populate("receiver", "firstName lastName");
+      .populate("sender", "firstName lastName Image age gender about")
+      .populate("receiver", "firstName lastName Image age gender about");
 
     let data = connections.map((row) => {
       if (row.sender._id.toString() === loggedInUser._id.toString()) {
@@ -78,7 +78,7 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
         { _id: { $ne: loggedInUser._id } },
       ],
     })
-      .select("firstName lastName skills")
+      .select("firstName lastName skills Image age about gender")
       .skip(skip)
       .limit(limit);
     res.send(users);

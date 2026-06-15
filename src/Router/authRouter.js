@@ -10,7 +10,7 @@ authRouter.post("/Signup", async (req, res) => {
   try {
     validatedata(req);
 
-    const { password, firstName, lastName, age, gender, email, skills } =
+    const { password, firstName, lastName, age, gender, email, skills, about } =
       req.body;
 
     let hashPassword = await bcrypt.hash(password, 10);
@@ -22,11 +22,17 @@ authRouter.post("/Signup", async (req, res) => {
       age,
       gender,
       skills,
+      about,
       password: hashPassword,
     });
 
-    await user.save();
-    res.send("Added to database");
+    const savedUser = await user.save();
+    const token = await savedUser.getJWT();
+
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+    res.json({ message: "User Added Sucessfully", data: savedUser });
   } catch (err) {
     res.status(400).send("Error adding a new member: " + err.message);
   }
